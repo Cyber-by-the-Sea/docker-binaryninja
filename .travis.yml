@@ -1,0 +1,25 @@
+language: minimal
+services:
+- docker
+env:
+  global:
+    - secure: Vx0/+rkZ33m8Q1/qvH8PN1qmXE7ZTWnVBTJ0rFctkfnw0S/cA2p9CjU2KGqGRb4iumPvfq6iKCrwzKcTMSC098nZ2M1LuP2EMKIPlGkF834GcpEG90nHA4G4VnhN42M/FQUkfUXIo/NUqBLUGPCCnHtF6aLveNkMBhDAM1SJJvjqfkVR83LQPc1HVcjoZ7kTJ2fJVF6u+moE+Xc2o/PGEMf1EJO7TdWRjsP2ZgR3MIhDGhSd/Z9Ff2le91wLzCdVgURIOzBb5lIGSdc53mIIKC9KmkgZkJsN6Q4JuPMmTMOkL80mnDcWOLFnB2XWhdYC5sN35TYwuZvvvXT+lhfaJV4HatVbUJwU7hfCrHc0ct8Y8dIhohl0UnXQdL+3DxBHaJ0AvWUUp5Z18SVPNmcLQvVAZPiKduxFe55lUKAR4JG3b/0ih8JC0QlMd7GalICXNiO1ZYZjmJhY+51Sowo6xY9u9YeJObu9HJFTzszQ6YQC2dLRYwvQMYEGD1nbtGYPkfOA/9l1jAR6RS33iofUdd5rJ26GyPXbOk1B3QF9SQKuDaQahupgt5GwVfmYpcN+LT4tVG30uBUw+hYJrkjUioNtkK2fKLJzhHJvQZqWJj0Wf7KQ7prUWC9kOVE99Uy/Vnyt90LGxrN+q89u02ZhaQf8fGKcR+rlDL1R3oWDnGg=
+    - DOCKER_USER=devtty1er
+    - DOCKER_IMAGE=devtty1er/binaryninja
+before_install:
+- echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER" --password-stdin
+- docker pull ubuntu
+script:
+- V0=$(docker run -it $DOCKER_IMAGE python3 -c 'import binaryninja; print(binaryninja.core_version(), end="")')
+- docker build . --build-arg TRAVIS_BRANCH=$TRAVIS_BRANCH --tag tmp
+- VF=$(docker run -it tmp python3 -c 'import binaryninja; print(binaryninja.core_version(), end="")')
+- docker tag tmp "$DOCKER_IMAGE:$VF" && docker tag tmp "$DOCKER_IMAGE:$TRAVIS_BRANCH"
+- if [ "$TRAVIS_BRANCH" = "dev" ]; then docker tag tmp "$DOCKER_IMAGE:latest" && docker tag ubuntu "$DOCKER_IMAGE-version:$VF"; fi
+deploy:
+  provider: script
+  script:
+    - docker push "$DOCKER_IMAGE:$VF" && docker push "$DOCKER_IMAGE:$TRAVIS_BRANCH"
+    - if [ "$TRAVIS_BRANCH" = "dev" ]; then docker push "$DOCKER_IMAGE:latest" && docker push "$DOCKER_IMAGE-version:$VF"; fi
+  on:
+    all_branches: true
+    condition: "$V0 != $VF"
