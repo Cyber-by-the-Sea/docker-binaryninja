@@ -14,12 +14,12 @@ script:
 - docker build . --build-arg TRAVIS_BRANCH=$TRAVIS_BRANCH --tag tmp
 - VF=$(docker run -it tmp python3 -c 'import binaryninja; print(binaryninja.core_version(), end="")')
 - docker tag tmp "$DOCKER_IMAGE:$VF" && docker tag tmp "$DOCKER_IMAGE:$TRAVIS_BRANCH"
-- if [ "$TRAVIS_BRANCH" = "dev" ]; then docker tag tmp "$DOCKER_IMAGE:latest" && docker tag ubuntu "$DOCKER_IMAGE-version:$VF"; fi
+- docker tag tmp "$DOCKER_IMAGE:latest" && docker tag ubuntu "$DOCKER_IMAGE-version:$VF"
 deploy:
   provider: script
   script:
     - docker push "$DOCKER_IMAGE:$VF" && docker push "$DOCKER_IMAGE:$TRAVIS_BRANCH"
-    - if [ "$TRAVIS_BRANCH" = "dev" ]; then docker push "$DOCKER_IMAGE:latest" && docker push "$DOCKER_IMAGE-version:$VF"; fi
+    - docker push "$DOCKER_IMAGE:latest" && docker push "$DOCKER_IMAGE-version:$VF"
   on:
     all_branches: true
     condition: "$V0 != $VF"
