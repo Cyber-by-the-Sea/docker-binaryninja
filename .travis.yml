@@ -13,7 +13,7 @@ script:
 - V0=$(docker run -it $DOCKER_IMAGE python3 -c 'import binaryninja; print(binaryninja.core_version(), end="")')
 - docker build . --build-arg TRAVIS_BRANCH=$TRAVIS_BRANCH --tag tmp
 - VF=$(docker run -it tmp python3 -c 'import binaryninja; print(binaryninja.core_version(), end="")')
-- docker tag tmp "$DOCKER_IMAGE:$VF" && docker tag tmp "$DOCKER_IMAGE:$TRAVIS_BRANCH && docker tag tmp "$DOCKER_IMAGE:latest" && docker tag ubuntu "$DOCKER_IMAGE-version:$VF"
+- docker tag tmp "$DOCKER_IMAGE:$VF" && docker tag tmp "$DOCKER_IMAGE:$TRAVIS_BRANCH" && docker tag tmp "$DOCKER_IMAGE:latest" && docker tag ubuntu "$DOCKER_IMAGE-version:$VF"
 deploy:
   provider: script
   script:
