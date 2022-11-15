@@ -21,6 +21,7 @@ COPY --from=binaryninja /root/.binaryninja/license.dat /root/.binaryninja/licens
 RUN apt-get update \
     && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
       ca-certificates \
+      libdbus-1-3 \
       python3 \
     && echo "/opt/binaryninja/python" > $(python3 -c 'import site; print(site.getsitepackages()[0] + "/binaryninja.pth")') \
     && ln -s /opt/binaryninja/binaryninja /usr/local/bin/binaryninja \
